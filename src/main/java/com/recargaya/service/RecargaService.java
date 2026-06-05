@@ -10,6 +10,8 @@ public class RecargaService {
     private static final double MAX_MONTO = 50000;
     private static final double MONTO_BONIFICACION_10_PORCIENTO = 10000;
     private static final double BONIFICACION_10_PORCIENTO = 0.10;
+    private static final double MONTO_BONIFICACION_25_PORCIENTO = 30000;
+    private static final double BONIFICACION_25_PORCIENTO = 0.25;
 
     public ResultadoRecarga calcularRecarga(double monto, boolean isPremium) {
         if (monto < MIN_MONTO || monto > MAX_MONTO) {
@@ -19,7 +21,9 @@ public class RecargaService {
         }
 
         double bonificacion = 0;
-        if (monto >= MONTO_BONIFICACION_10_PORCIENTO) {
+        if (monto >= MONTO_BONIFICACION_25_PORCIENTO) {
+            bonificacion = monto * BONIFICACION_25_PORCIENTO;
+        } else if (monto >= MONTO_BONIFICACION_10_PORCIENTO) {
             bonificacion = monto * BONIFICACION_10_PORCIENTO;
         }
 
