@@ -1,15 +1,22 @@
 package com.recargaya.service;
 
 import com.recargaya.model.ResultadoRecarga;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class RecargaServiceTest {
 
+    private RecargaService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new RecargaService();
+    }
+
     @Test
     void deberiaRechazarRecargaMenorA1000() {
-        RecargaService service = new RecargaService();
 
         ResultadoRecarga resultado = service.calcularRecarga(999, false);
 
@@ -19,8 +26,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaRechazarRecargaMayorA50000() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(50001, false);
 
         assertFalse(resultado.isAceptada());
@@ -29,8 +34,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAplicarBonificacion10PorCientoEn10000() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(10000, false);
 
         assertTrue(resultado.isAceptada());
@@ -39,8 +42,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAplicarBonificacion25PorCientoEn30000() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(30000, false);
 
         assertTrue(resultado.isAceptada());
@@ -49,8 +50,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAplicarBonificacionPremiumAdicional5PorCiento() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(10000, true);
 
         assertTrue(resultado.isAceptada());
@@ -59,8 +58,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAceptarRecargaEn1000SinBonificacion() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(1000, false);
 
         assertTrue(resultado.isAceptada());
@@ -69,8 +66,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAceptarRecargaEn9999SinBonificacion() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(9999, false);
 
         assertTrue(resultado.isAceptada());
@@ -79,8 +74,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAplicarBonificacion10PorCientoEn29999() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(29999, false);
 
         assertTrue(resultado.isAceptada());
@@ -89,8 +82,6 @@ class RecargaServiceTest {
 
     @Test
     void deberiaAplicarBonificacion25PorCientoEn50000() {
-        RecargaService service = new RecargaService();
-
         ResultadoRecarga resultado = service.calcularRecarga(50000, false);
 
         assertTrue(resultado.isAceptada());
