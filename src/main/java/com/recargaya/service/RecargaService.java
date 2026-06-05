@@ -20,13 +20,17 @@ public class RecargaService {
                 0, 0);
         }
 
-        double bonificacion = 0;
-        if (monto >= MONTO_BONIFICACION_25_PORCIENTO) {
-            bonificacion = monto * BONIFICACION_25_PORCIENTO;
-        } else if (monto >= MONTO_BONIFICACION_10_PORCIENTO) {
-            bonificacion = monto * BONIFICACION_10_PORCIENTO;
-        }
+        double bonificacion = calcularBonificacionBase(monto);
 
         return new ResultadoRecarga(true, "Recarga aceptada", monto, bonificacion);
+    }
+
+    private double calcularBonificacionBase(double monto) {
+        if (monto >= MONTO_BONIFICACION_25_PORCIENTO) {
+            return monto * BONIFICACION_25_PORCIENTO;
+        } else if (monto >= MONTO_BONIFICACION_10_PORCIENTO) {
+            return monto * BONIFICACION_10_PORCIENTO;
+        }
+        return 0;
     }
 }
