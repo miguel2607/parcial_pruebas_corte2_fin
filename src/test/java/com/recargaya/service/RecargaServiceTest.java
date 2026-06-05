@@ -56,4 +56,24 @@ class RecargaServiceTest {
         assertTrue(resultado.isAceptada());
         assertEquals(1050, resultado.getBonificacion(), 0.01);
     }
+
+    @Test
+    void deberiaAceptarRecargaEn1000SinBonificacion() {
+        RecargaService service = new RecargaService();
+
+        ResultadoRecarga resultado = service.calcularRecarga(1000, false);
+
+        assertTrue(resultado.isAceptada());
+        assertEquals(0, resultado.getBonificacion(), 0.01);
+    }
+
+    @Test
+    void deberiaAceptarRecargaEn9999SinBonificacion() {
+        RecargaService service = new RecargaService();
+
+        ResultadoRecarga resultado = service.calcularRecarga(9999, false);
+
+        assertTrue(resultado.isAceptada());
+        assertEquals(0, resultado.getBonificacion(), 0.01);
+    }
 }
