@@ -12,6 +12,7 @@ public class RecargaService {
     private static final double BONIFICACION_10_PORCIENTO = 0.10;
     private static final double MONTO_BONIFICACION_25_PORCIENTO = 30000;
     private static final double BONIFICACION_25_PORCIENTO = 0.25;
+    private static final double BONIFICACION_PREMIUM = 0.05;
 
     public ResultadoRecarga calcularRecarga(double monto, boolean isPremium) {
         if (monto < MIN_MONTO || monto > MAX_MONTO) {
@@ -21,6 +22,10 @@ public class RecargaService {
         }
 
         double bonificacion = calcularBonificacionBase(monto);
+
+        if (isPremium && bonificacion > 0) {
+            bonificacion += bonificacion * BONIFICACION_PREMIUM;
+        }
 
         return new ResultadoRecarga(true, "Recarga aceptada", monto, bonificacion);
     }
