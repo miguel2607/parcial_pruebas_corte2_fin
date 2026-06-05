@@ -22,10 +22,7 @@ public class RecargaService {
         }
 
         double bonificacion = calcularBonificacionBase(monto);
-
-        if (isPremium && bonificacion > 0) {
-            bonificacion += bonificacion * BONIFICACION_PREMIUM;
-        }
+        bonificacion = aplicarBonificacionPremium(bonificacion, isPremium);
 
         return new ResultadoRecarga(true, "Recarga aceptada", monto, bonificacion);
     }
@@ -37,5 +34,12 @@ public class RecargaService {
             return monto * BONIFICACION_10_PORCIENTO;
         }
         return 0;
+    }
+
+    private double aplicarBonificacionPremium(double bonificacion, boolean isPremium) {
+        if (isPremium && bonificacion > 0) {
+            return bonificacion + (bonificacion * BONIFICACION_PREMIUM);
+        }
+        return bonificacion;
     }
 }
