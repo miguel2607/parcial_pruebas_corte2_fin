@@ -8,6 +8,8 @@ public class RecargaService {
 
     private static final double MIN_MONTO = 1000;
     private static final double MAX_MONTO = 50000;
+    private static final double TIER1_MONTO = 10000;
+    private static final double TIER1_BONIFICACION = 0.10;
 
     public ResultadoRecarga calcularRecarga(double monto, boolean isPremium) {
         if (monto < MIN_MONTO || monto > MAX_MONTO) {
@@ -17,8 +19,8 @@ public class RecargaService {
         }
 
         double bonificacion = 0;
-        if (monto >= 10000) {
-            bonificacion = monto * 0.10;
+        if (monto >= TIER1_MONTO) {
+            bonificacion = monto * TIER1_BONIFICACION;
         }
 
         return new ResultadoRecarga(true, "Recarga aceptada", monto, bonificacion);
