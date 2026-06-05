@@ -87,4 +87,12 @@ class RecargaServiceTest {
         assertTrue(resultado.isAceptada());
         assertEquals(12500, resultado.getBonificacion(), 0.01);
     }
+
+    @Test
+    void deberiaAplicarBonificacionPremiumEn30000() {
+        ResultadoRecarga resultado = service.calcularRecarga(30000, true);
+
+        assertTrue(resultado.isAceptada());
+        assertEquals(7875, resultado.getBonificacion(), 0.01);
+    }
 }
