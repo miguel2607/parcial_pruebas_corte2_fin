@@ -1,0 +1,169 @@
+name: CI Pipeline - RecargaYa
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test-unitarios:
+    name: Tests Unitarios (JUnit)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Ejecutar tests unitarios
+      run: mvn clean test
+
+    - name: Subir reporte de cobertura JaCoCo
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: jacoco-report
+        path: target/site/jacoco/
+
+  test-bdd:
+    name: Tests BDD (Cucumber)
+    runs-on: ubuntu-latest
+    needs: test-unitarios
+
+    steps:
+    - name: Checkout codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Ejecutar tests BDD
+      run: mvn clean verify
+
+    - name: Subir reporte Cucumber
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: cucumber-report
+        path: target/cucumber-reports/
+
+  test-seguridad:
+    name: Pruebas de Seguridad (OWASP ZAP)
+    runs-on: ubuntu-latest
+    needs: test-bdd
+
+    steps:
+    - name: Checkout codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Compilar aplicacion
+      run: mvn clean package -DskipTests
+
+    - name: Iniciar aplicacion en background
+      run: |
+        java -jar target/recarga-service-1.0.0.jar &
+        echo $! > app.pid
+        sleep 30
+
+    - name: Verificar que la aplicacion este corriendo
+      run: |
+        curl -f http://localhost:8080/actuator/health || echo "Health check fallido"
+        sleep 5
+
+    - name: Escaneo OWASP ZAP
+      uses: zaproxy/action-baseline@v0.12.0
+      with:
+        target: 'http://localhost:8080'
+        rules_file_name: '.zap/rules.tsv'
+        allow_issue_writing: false
+        fail_action: false
+
+    - name: Detener aplicacion
+      if: always()
+      run: |
+        if [ -f app.pid ]; then
+          kill $(cat app.pid) || true
+        fi
+
+  test-rendimiento:
+    name: Pruebas de Rendimiento (Locust)
+    runs-on: ubuntu-latest
+    needs: test-seguridad
+
+    steps:
+    - name: Checkout codigo
+      uses: actions/checkout@v4
+
+    - name: Configurar JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Configurar Python 3
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: Instalar Locust
+      run: pip install -r requirements.txt
+
+    - name: Compilar aplicacion
+      run: mvn clean package -DskipTests
+
+    - name: Iniciar aplicacion en background
+      run: |
+        java -jar target/recarga-service-1.0.0.jar &
+        echo $! > app.pid
+        sleep 30
+
+    - name: Verificar que la aplicacion este corriendo
+      run: curl -f http://localhost:8080/actuator/health
+
+    - name: Ejecutar pruebas de rendimiento con Locust
+      run: |
+        locust --headless --users 30 --spawn-rate 5 --run-time 60s --host http://localhost:8080 --html target/locust-report.html --csv target/locust
+
+    - name: Verificar P95 < 300ms
+      run: |
+        P95=$(awk -F',' 'NR==2 {print $9}' target/locust_stats.csv)
+        echo "P95: $P95 ms"
+        if (( $(echo "$P95 > 300" | bc -l) )); then
+          echo "ERROR: P95 ($P95 ms) excede el limite de 300ms"
+          exit 1
+        fi
+        echo "OK: P95 ($P95 ms) esta por debajo de 300ms"
+
+    - name: Detener aplicacion
+      if: always()
+      run: |
+        if [ -f app.pid ]; then
+          kill $(cat app.pid) || true
+        fi
+
+    - name: Subir reporte de Locust
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: locust-report
+        path: target/locust*
