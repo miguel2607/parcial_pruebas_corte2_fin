@@ -16,6 +16,11 @@ public class RecargaService {
                 0, 0);
         }
 
-        return new ResultadoRecarga(true, "Recarga aceptada", monto, 0);
+        double bonificacion = 0;
+        if (monto >= 10000) {
+            bonificacion = monto * 0.10;
+        }
+
+        return new ResultadoRecarga(true, "Recarga aceptada", monto, bonificacion);
     }
 }
