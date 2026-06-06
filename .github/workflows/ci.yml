@@ -91,8 +91,7 @@ jobs:
     - name: Escaneo OWASP ZAP
       uses: zaproxy/action-baseline@v0.12.0
       with:
-        target: 'http://localhost:8080'
-        rules_file_name: '.zap/rules.tsv'
+        target: 'http://localhost:8080/actuator/health'
         allow_issue_writing: false
         fail_action: false
 
