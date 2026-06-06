@@ -48,16 +48,24 @@ class RecargaUser(HttpUser):
 
     @task(1)
     def recarga_invalida_monto_bajo(self):
-        """Recarga inválida - monto menor al mínimo"""
-        self.client.post("/api/recargas", json={
+        """Recarga inválida - monto menor al mínimo (debe retornar 400)"""
+        with self.client.post("/api/recargas", json={
             "monto": random.randint(100, 999),
             "isPremium": False
-        })
+        }, catch_response=True) as response:
+            if response.status_code == 400:
+                response.success()  # 400 es esperado, marcar como éxito
+            else:
+                response.failure(f"Se esperaba 400 pero se recibió {response.status_code}")
 
     @task(1)
     def recarga_invalida_monto_alto(self):
-        """Recarga inválida - monto mayor al máximo"""
-        self.client.post("/api/recargas", json={
+        """Recarga inválida - monto mayor al máximo (debe retornar 400)"""
+        with self.client.post("/api/recargas", json={
             "monto": random.randint(50001, 100000),
             "isPremium": False
-        })
+        }, catch_response=True) as response:
+            if response.status_code == 400:
+                response.success()  # 400 es esperado, marcar como éxito
+            else:
+                response.failure(f"Se esperaba 400 pero se recibió {response.status_code}")
